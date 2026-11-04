@@ -1,0 +1,12 @@
+{
+  "name": "nbk-rates",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Архив официальных курсов Национального банка РК",
+  "scripts": {
+    "test": "node --test",
+    "fetch": "node scripts/fetch-rates.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

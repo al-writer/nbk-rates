@@ -1,0 +1,70 @@
+name: Update rates
+
+on:
+  schedule:
+    # 03:17 и 15:47 UTC = 08:17 и 20:47 по Алматы (минуты не «круглые» — меньше задержек очереди)
+    - cron: '17 3 * * *'
+    - cron: '47 15 * * *'
+  workflow_dispatch:
+    inputs:
+      from:
+        description: 'Бэкфилл: загрузить архив начиная с даты YYYY-MM-DD (пусто — только последние дни)'
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths: ['scripts/**', '.github/workflows/rates.yml']
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: rates
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - name: Fetch rates
+        run: node scripts/fetch-rates.mjs
+        env:
+          FROM: ${{ inputs.from }}
+      - name: Commit new data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- '20*' latest.json
+          if git diff --cached --quiet; then
+            echo "Новых данных нет"
+          else
+            git commit -m "data: official NBK rates $(date -u +%F)"
+            git push origin HEAD:main
+          fi
+      - name: Prepare site
+        run: |
+          mkdir _site
+          cp -r 20* latest.json _site/
+          cp site/index.html _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: update
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
