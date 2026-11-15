@@ -1,7 +1,7 @@
 {
-  "date": "2026-11-15",
-  "source": "https://nationalbank.kz/rss/get_rates.cfm?fdate=15.11.2026",
-  "fetchedAt": "2026-11-14T20:04:58.589Z",
+  "date": "2026-11-16",
+  "source": "https://nationalbank.kz/rss/get_rates.cfm?fdate=16.11.2026",
+  "fetchedAt": "2026-11-15T20:35:21.518Z",
   "rates": {
     "AUD": 301.59,
     "AZN": 262.12,
